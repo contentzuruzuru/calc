@@ -12,41 +12,26 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Light gray background */
         }
-        /* Initially hide the app content until password is entered */
-        #app-content { display: none; }
+        #app-content { display: block; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
     <div id="app-content" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Recipe Ingredient Calculator</h1>
 
-        <!-- Input for X (Total Weight) and Unit Selector -->
+        <!-- Input for X (Total Weight) -->
         <div class="mb-5">
             <label for="totalWeight" class="block text-gray-700 text-sm font-semibold mb-2">
-                Enter Total Weight (X):
+                Enter Total Weight (X) in Kilograms:
             </label>
-            <div class="flex items-center space-x-2">
-                <input
-                    type="number"
-                    id="totalWeight"
-                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                    placeholder="e.g., 1.0 (for 1 kg) or 500 (for 500 g)"
-                    min="0"
-                    step="0.01"
-                >
-                <div class="relative">
-                    <select
-                        id="weightUnit"
-                        class="block appearance-none bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded-lg shadow-sm leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                    >
-                        <option value="kg">Kilograms (kg)</option>
-                        <option value="g">Grams (g)</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                </div>
-            </div>
+            <input
+                type="number"
+                id="totalWeight"
+                class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
+                placeholder="e.g., 1.0 (for 1 kg)"
+                min="0"
+                step="0.01"
+            >
         </div>
 
         <!-- Dropdown for Recipe Type -->
@@ -102,36 +87,31 @@
     </div>
 
     <script>
-// Password protection logic, runs immediately when the script loads
 (function passwordProtect() {
     const allowedPasswords = ["zurukonnichiwa", "navikaK", "basekitchen789"];
     let entered = prompt("Enter the password to access this app:");
     if (allowedPasswords.includes(entered)) {
-        document.getElementById('app-content').style.display = ''; // Make the app content visible
+        document.getElementById('app-content').style.display = '';
     } else {
-        // Display access denied message using the custom message box
+        // Using a custom message box instead of alert for consistent UI and iframe compatibility
+        // This is a simplified redirect, in a full app you might show a persistent error.
         document.getElementById('messageTitle').textContent = 'Access Denied';
         document.getElementById('messageContent').textContent = 'Incorrect password. Access denied. Redirecting...';
         document.getElementById('messageBox').classList.remove('hidden');
-        // Redirect after the user clicks OK on the message box
         document.getElementById('closeMessage').addEventListener('click', () => {
             window.location.href = "https://www.google.com";
-        }, { once: true }); // Ensure the event listener only triggers once
+        }, { once: true }); // Use { once: true } to ensure it only runs once
     }
 })();
 
-// Main application logic, runs after the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Only proceed with app logic if the app-content is visible (i.e., password was correct)
+    // Check if app-content is visible after password protection
     if (document.getElementById('app-content').style.display === 'none') {
-        // If app-content is still hidden, it means the password was incorrect,
-        // so the script should not attempt to set up event listeners or access elements
-        // that are not yet visible or accessible.
-        console.log('App content hidden due to password protection. Waiting for correct password.');
-        return; // Exit the function if access is not granted
+        console.log('App content hidden initially due to password protection. Waiting for correct password.');
+        return; // Exit if app content is hidden
     }
 
-    // Define recipes with ingredient percentages relative to the total weight
+    // Recipe definitions (black fungus removed as per instructions)
     const recipes = {
         "chickenThigh": { "Salt": 0.8, "Tasty salt": 0.2, "Mirin": 3, "ZZ Kikoman": 3, "Kombu": 0.5 },
         "chickenWing": { "Salt": 0.8, "Tasty salt": 0.2, "Mirin": 3, "ZZ Kikoman": 3, "Kombu": 0.5 },
@@ -141,9 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
         "eggBrine": { "Salt": 1.3, "Sugar": 3, "ZZ Soy": 3, "Mirin": 3, "Kombu": 0.5 },
     };
 
-    // Get references to all necessary DOM elements
+    // DOM elements
     const totalWeightInput = document.getElementById('totalWeight');
-    const weightUnitSelect = document.getElementById('weightUnit'); // Reference to the new unit dropdown
     const recipeTypeSelect = document.getElementById('recipeType');
     const calculateBtn = document.getElementById('calculateBtn');
     const resultsDiv = document.getElementById('results');
@@ -155,77 +134,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /**
      * Displays a custom message box with a title and content.
-     * This replaces the browser's alert() for better UI and iframe compatibility.
      * @param {string} title - The title of the message.
      * @param {string} message - The content of the message.
      */
     function showMessageBox(title, message) {
         messageTitle.textContent = title;
         messageContent.textContent = message;
-        messageBox.classList.remove('hidden'); // Show the message box
+        messageBox.classList.remove('hidden');
     }
 
     /**
      * Hides the custom message box.
      */
     function hideMessageBox() {
-        messageBox.classList.add('hidden'); // Hide the message box
+        messageBox.classList.add('hidden');
     }
 
-    // Add event listener to the "OK" button in the message box to hide it
+    // Event listener for closing the message box
     closeMessageBtn.addEventListener('click', hideMessageBox);
 
     /**
      * Calculates the ingredients based on total weight and selected recipe type.
-     * All calculations are performed in grams, and results are displayed in grams.
      */
     function calculateIngredients() {
-        let totalWeight = parseFloat(totalWeightInput.value); // Get input weight
-        const selectedUnit = weightUnitSelect.value; // Get selected unit ('kg' or 'g')
-        const selectedRecipeType = recipeTypeSelect.value; // Get selected recipe type
+        let totalWeight = parseFloat(totalWeightInput.value);
+        const selectedRecipeType = recipeTypeSelect.value;
 
         // Input validation
         if (isNaN(totalWeight) || totalWeight <= 0) {
             showMessageBox('Input Error', 'Please enter a valid positive number for Total Weight (X).');
-            return; // Stop execution if validation fails
+            return;
         }
         if (!selectedRecipeType) {
             showMessageBox('Input Error', 'Please select a Recipe Type.');
-            return; // Stop execution if validation fails
+            return;
         }
 
-        // Convert totalWeight to grams if the input unit is kilograms
-        if (selectedUnit === 'kg') {
-            totalWeight *= 1000; // 1 kg = 1000 grams
-        }
-        // If selectedUnit is 'g', totalWeight is already in grams, so no conversion is needed
-
-        const selectedRecipe = recipes[selectedRecipeType]; // Get the recipe object
-        ingredientList.innerHTML = ''; // Clear any previously displayed ingredients
-        resultsDiv.classList.add('hidden'); // Hide the results area until calculations are done
+        totalWeight *= 1000; // Convert kilograms to grams for calculation
+        const selectedRecipe = recipes[selectedRecipeType];
+        ingredientList.innerHTML = ''; // Clear previous results
+        resultsDiv.classList.add('hidden'); // Hide results until calculated
 
         if (selectedRecipe) {
-            // Iterate over each ingredient in the selected recipe
+            // Iterate through ingredients and calculate amounts
             for (const ingredient in selectedRecipe) {
-                // Ensure the property belongs to the recipe object and not its prototype chain
                 if (selectedRecipe.hasOwnProperty(ingredient)) {
-                    const percentage = selectedRecipe[ingredient]; // Get the percentage for the current ingredient
-                    const grams = (percentage / 100) * totalWeight; // Calculate the amount in grams
-                    const listItem = document.createElement('li'); // Create a new list item element
-                    listItem.className = 'py-1 border-b border-gray-100 last:border-b-0'; // Apply Tailwind classes for styling
-                    // Set the text content for the list item, showing ingredient, grams, and original percentage
+                    const percentage = selectedRecipe[ingredient];
+                    const grams = (percentage / 100) * totalWeight; // Calculate grams based on percentage
+                    const listItem = document.createElement('li');
+                    listItem.className = 'py-1 border-b border-gray-100 last:border-b-0';
                     listItem.textContent = `${ingredient}: ${grams.toFixed(2)} grams (${percentage}%)`;
-                    ingredientList.appendChild(listItem); // Add the list item to the results list
+                    ingredientList.appendChild(listItem);
                 }
             }
-            resultsDiv.classList.remove('hidden'); // Show the results area after calculations
+            resultsDiv.classList.remove('hidden'); // Show results
         } else {
-            // If the selected recipe type is not found in the 'recipes' object
-            showMessageBox('Error', 'Selected recipe type not found. Please choose a valid recipe.');
+            showMessageBox('Error', 'Selected recipe type not found.');
         }
     }
 
-    // Add event listener to the "Calculate Ingredients" button
+    // Event listener for the calculate button
     calculateBtn.addEventListener('click', calculateIngredients);
 });
 </script>
