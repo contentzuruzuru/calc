@@ -93,19 +93,25 @@
     if (allowedPasswords.includes(entered)) {
         document.getElementById('app-content').style.display = '';
     } else {
-        alert("Incorrect password. Access denied.");
-        window.location.href = "https://www.google.com";
+        // Using a custom message box instead of alert for consistent UI and iframe compatibility
+        // This is a simplified redirect, in a full app you might show a persistent error.
+        document.getElementById('messageTitle').textContent = 'Access Denied';
+        document.getElementById('messageContent').textContent = 'Incorrect password. Access denied. Redirecting...';
+        document.getElementById('messageBox').classList.remove('hidden');
+        document.getElementById('closeMessage').addEventListener('click', () => {
+            window.location.href = "https://www.google.com";
+        }, { once: true }); // Use { once: true } to ensure it only runs once
     }
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if app-content is visible
+    // Check if app-content is visible after password protection
     if (document.getElementById('app-content').style.display === 'none') {
-        console.log('App content hidden: password protection');
-        return;
+        console.log('App content hidden initially due to password protection. Waiting for correct password.');
+        return; // Exit if app content is hidden
     }
 
-    // Recipe definitions (black fungus removed from all recipes)
+    // Recipe definitions (black fungus removed as per instructions)
     const recipes = {
         "chickenThigh": { "Salt": 0.8, "Tasty salt": 0.2, "Mirin": 3, "ZZ Kikoman": 3, "Kombu": 0.5 },
         "chickenWing": { "Salt": 0.8, "Tasty salt": 0.2, "Mirin": 3, "ZZ Kikoman": 3, "Kombu": 0.5 },
@@ -126,22 +132,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageContent = document.getElementById('messageContent');
     const closeMessageBtn = document.getElementById('closeMessage');
 
+    /**
+     * Displays a custom message box with a title and content.
+     * @param {string} title - The title of the message.
+     * @param {string} message - The content of the message.
+     */
     function showMessageBox(title, message) {
         messageTitle.textContent = title;
         messageContent.textContent = message;
         messageBox.classList.remove('hidden');
     }
 
+    /**
+     * Hides the custom message box.
+     */
     function hideMessageBox() {
         messageBox.classList.add('hidden');
     }
 
+    // Event listener for closing the message box
     closeMessageBtn.addEventListener('click', hideMessageBox);
 
+    /**
+     * Calculates the ingredients based on total weight and selected recipe type.
+     */
     function calculateIngredients() {
         let totalWeight = parseFloat(totalWeightInput.value);
         const selectedRecipeType = recipeTypeSelect.value;
 
+        // Input validation
         if (isNaN(totalWeight) || totalWeight <= 0) {
             showMessageBox('Input Error', 'Please enter a valid positive number for Total Weight (X).');
             return;
@@ -151,28 +170,30 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        totalWeight *= 1000; // Convert to grams
+        totalWeight *= 1000; // Convert kilograms to grams for calculation
         const selectedRecipe = recipes[selectedRecipeType];
-        ingredientList.innerHTML = '';
-        resultsDiv.classList.add('hidden');
+        ingredientList.innerHTML = ''; // Clear previous results
+        resultsDiv.classList.add('hidden'); // Hide results until calculated
 
         if (selectedRecipe) {
+            // Iterate through ingredients and calculate amounts
             for (const ingredient in selectedRecipe) {
                 if (selectedRecipe.hasOwnProperty(ingredient)) {
                     const percentage = selectedRecipe[ingredient];
-                    const grams = (percentage / 100) * totalWeight;
+                    const grams = (percentage / 100) * totalWeight; // Calculate grams based on percentage
                     const listItem = document.createElement('li');
                     listItem.className = 'py-1 border-b border-gray-100 last:border-b-0';
                     listItem.textContent = `${ingredient}: ${grams.toFixed(2)} grams (${percentage}%)`;
                     ingredientList.appendChild(listItem);
                 }
             }
-            resultsDiv.classList.remove('hidden');
+            resultsDiv.classList.remove('hidden'); // Show results
         } else {
             showMessageBox('Error', 'Selected recipe type not found.');
         }
     }
 
+    // Event listener for the calculate button
     calculateBtn.addEventListener('click', calculateIngredients);
 });
 </script>
